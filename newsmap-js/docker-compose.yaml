@@ -1,7 +1,7 @@
 services:
   web:
     build: .
-    image: newsmap-js
+    image: tlarcombe/newsmap-js
     container_name: newsmap-js
     ports:
       - 8030:8000

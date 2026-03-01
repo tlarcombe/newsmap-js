@@ -62,6 +62,8 @@ app.use(
         const origin = userReq.headers["origin"];
         if (
           origin === "https://newsmap.ijmacd.com" ||
+          origin === "https://newsmap.larcombe.tech" ||
+          origin.startsWith("http://newsmap.int.larcombe.tech") ||
           origin.startsWith("http://localhost:") ||
           origin.startsWith("http://127.0.0.1:")
         ) {
