@@ -49,6 +49,7 @@ import { useCategoryItems } from './useCategoryItems.js';
  * @param {number} props.itemsPerCategory
  * @param {number} props.refreshTime
  * @param {boolean} props.newTab
+ * @param {boolean} [props.translate]
  * @param {(article: Article, e: import('react').MouseEvent) => void} props.onArticleClick
  */
 function Edition({
@@ -62,9 +63,10 @@ function Edition({
   itemsPerCategory,
   newTab,
   refreshTime,
+  translate,
   onArticleClick,
 }) {
-  let items = useCategoryItems(categories, refreshTime, edition, itemsPerCategory, weightingMode);
+  let items = useCategoryItems(categories, refreshTime, edition, itemsPerCategory, weightingMode, translate);
 
   // Fast visual update
   // (Article sizes update every 60 seconds, doesn't refetch)

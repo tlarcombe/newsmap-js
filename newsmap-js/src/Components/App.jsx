@@ -70,6 +70,7 @@ class App extends Component {
       showImages: false,
       showGradient: true,
       palette: "default",
+      translateEditions: [],
       showOptions: false,
       showSearchOptions: false,
       headerTop: false,
@@ -350,6 +351,7 @@ class App extends Component {
       enableSourcesModal,
       weightingMode,
       selectedArticle,
+      translateEditions,
     } = this.state;
 
     const showImages = false;
@@ -381,6 +383,7 @@ class App extends Component {
                   refreshTime={refreshTime || defaultRefreshTime}
                   newTab={newTab}
                   weightingMode={weightingMode}
+                  translate={translateEditions.includes(ed)}
                   onArticleClick={this.handleArticleClick.bind(this)}
                 />
               </div>
@@ -399,6 +402,7 @@ class App extends Component {
         {showOptions &&
           <OptionsModal
             selectedEditions={this.state.selectedEditions}
+            translateEditions={translateEditions}
             mode={this.state.mode}
             weightingMode={weightingMode}
             headerTop={this.state.headerTop}

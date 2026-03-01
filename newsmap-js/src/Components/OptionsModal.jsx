@@ -3,6 +3,16 @@ import { ucfirst } from '../util.js';
 import * as palettes from '../colours.js';
 import editions from '../data/editions.json';
 
+const TRANSLATE_LABEL_STYLE = {
+  marginLeft: 'auto',
+  fontSize: '0.75em',
+  padding: '1px 5px',
+  borderRadius: 3,
+  border: '1px solid #888',
+  cursor: 'pointer',
+  lineHeight: 1.4,
+};
+
 /**
  *
  * @param {object} props
@@ -23,6 +33,7 @@ import editions from '../data/editions.json';
  */
 export function OptionsModal({
   selectedEditions,
+  translateEditions,
   mode,
   weightingMode,
   showGradient,
@@ -36,15 +47,29 @@ export function OptionsModal({
   setSavedState,
   donationLink,
 }) {
-  /**
-   * @param {import('react').FormEvent<HTMLSelectElement>} e
-   */
-  function handleEditionChange(e) {
-    const { options } = e.currentTarget;
+  const [editionSearch, setEditionSearch] = useState('');
 
-    const selectedEditions = Array.from(options).filter(o => o.selected).map(o => o.value);
+  const filteredEditions = editions.filter(ed =>
+    ed.name.toLowerCase().includes(editionSearch.toLowerCase())
+  );
 
-    onEditionChange(selectedEditions);
+  function toggleEdition(value, checked) {
+    const next = checked
+      ? [...selectedEditions, value]
+      : selectedEditions.filter(v => v !== value);
+    // If deselecting, also remove from translateEditions
+    if (!checked) {
+      setSavedState({ translateEditions: (translateEditions || []).filter(e => e !== value) });
+    }
+    onEditionChange(next);
+  }
+
+  function toggleTranslate(value) {
+    const current = translateEditions || [];
+    const next = current.includes(value)
+      ? current.filter(e => e !== value)
+      : [...current, value];
+    setSavedState({ translateEditions: next });
   }
 
   return (
@@ -53,17 +78,51 @@ export function OptionsModal({
         <h1>Options</h1>
         <div className="App-modalbody">
           <div className="App-formgroup">
-            <label htmlFor="sel-editions">
-              Edition
-            </label>
-            <select
-              id="sel-editions"
-              multiple
-              onChange={handleEditionChange}
-              value={selectedEditions}
-            >
-              {editions.map(ed => <option key={ed.value} value={ed.value}>{ed.name}</option>)}
-            </select>
+            <label>Editions</label>
+            <div>
+              <input
+                type="text"
+                placeholder="Search editions…"
+                value={editionSearch}
+                onChange={e => setEditionSearch(e.target.value)}
+                style={{ width: '100%', marginBottom: 6, boxSizing: 'border-box' }}
+              />
+              <div style={{ maxHeight: 200, overflowY: 'auto', border: '1px solid #555', borderRadius: 3, padding: '2px 4px' }}>
+                {filteredEditions.map(ed => {
+                  const isSelected = selectedEditions.includes(ed.value);
+                  const isTranslated = (translateEditions || []).includes(ed.value);
+                  return (
+                    <label
+                      key={ed.value}
+                      style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '3px 2px', cursor: 'pointer', userSelect: 'none' }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={e => toggleEdition(ed.value, e.target.checked)}
+                      />
+                      <span style={{ flex: 1 }}>{ed.name}</span>
+                      {isSelected && (
+                        <button
+                          title="Translate headlines to English"
+                          style={{
+                            ...TRANSLATE_LABEL_STYLE,
+                            background: isTranslated ? '#2563eb' : 'transparent',
+                            color: isTranslated ? '#fff' : 'inherit',
+                          }}
+                          onClick={e => { e.preventDefault(); toggleTranslate(ed.value); }}
+                        >
+                          EN
+                        </button>
+                      )}
+                    </label>
+                  );
+                })}
+              </div>
+              <p style={{ fontSize: '0.75em', fontStyle: 'italic', margin: '4px 0 0' }}>
+                Ctrl+click not required — just check each edition. Click <strong>EN</strong> on a selected edition to translate its headlines to English.
+              </p>
+            </div>
           </div>
           <div className="App-formgroup">
             <label htmlFor="chk-top-header">

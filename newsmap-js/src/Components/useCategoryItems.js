@@ -1,5 +1,6 @@
 import { useContext, useEffect, useRef, useState } from 'react';
 import { getNews } from '../sources/GoogleNewsRSS.js';
+import { translateArticles } from '../translate.js';
 import { ucfirst } from '../util.js';
 import { SearchContext } from '../SearchContext.js';
 import { isSearchMatching } from '../isSearchMatching.js';
@@ -15,8 +16,9 @@ import { isSearchMatching } from '../isSearchMatching.js';
  * @param {string} edition
  * @param {number} itemsPerCategory
  * @param {"time"|"sourceCount"|"sources"|"position"} weightMode
+ * @param {boolean} [translate]
  */
-export function useCategoryItems(categories, refreshTime, edition, itemsPerCategory, weightMode = "time") {
+export function useCategoryItems(categories, refreshTime, edition, itemsPerCategory, weightMode = "time", translate = false) {
 
     const [categoryData, setCategoryData] = useState(/** @type {{ [id: string]: Category }} */({}));
     const loaderRef = useRef(/** @type {((cancellable: { current: boolean; }) => void)?} */(null));
@@ -47,8 +49,13 @@ export function useCategoryItems(categories, refreshTime, edition, itemsPerCateg
 
         try {
             const loadedCategories = await Promise.all(
-                todoList.map(category => getNews({ category, edition }).then(data => {
+                todoList.map(category => getNews({ category, edition }).then(async data => {
                     let { category, articles, title } = data;
+
+                    if (translate) {
+                        articles = await translateArticles(articles);
+                    }
+
                     const key = `${edition}_${category}`;
 
                     return {
@@ -77,6 +84,10 @@ export function useCategoryItems(categories, refreshTime, edition, itemsPerCateg
     }
 
     useEffect(() => {
+        setCategoryData({});
+    }, [translate]);
+
+    useEffect(() => {
         if (loaderRef.current) {
             let cancellable = { current: true };
 
@@ -84,7 +95,7 @@ export function useCategoryItems(categories, refreshTime, edition, itemsPerCateg
 
             return () => { cancellable.current = false; };
         }
-    }, [edition, categories]);
+    }, [edition, categories, translate]);
 
     useEffect(() => {
         let cancellable = { current: true };
