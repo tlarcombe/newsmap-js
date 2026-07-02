@@ -287,7 +287,7 @@ class App extends Component {
       <header className="App-header">
         <div className="App-header-config">
           <div className="App-header-config-topline">
-            <h1 className="App-title" style={{ flex: 1 }}><a href="https://newsmap.ijmacd.com">NewsMap.JS</a></h1>
+            <h1 className="App-title" style={{ flex: 1 }}><a href="https://newsmap.larcombe.tech">NewsMap.JS (Enhanced Multi-Edition)</a></h1>
             <div className="App-header-controls">
               <button style={{ margin: 4 }} onClick={() => this.setState({ showOptions: true })}>Options</button>
               <button style={{ margin: 4 }} onClick={() => this.ref && requestFullscreen(this.ref)}>Fullscreen</button>
