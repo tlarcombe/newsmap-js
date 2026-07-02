@@ -67,29 +67,29 @@ docker compose up -d
 
 ## Deployment
 
-**Target host:** baloo (`ssh -A tlarcombe@baloo.int.larcombe.tech`)
-**Repo on host:** `~/docker/newsmap/newsmap-js/`
+**Production (public):** denursrv01 (Hetzner, `ssh tlarcombe@178.105.81.121`)
+- App: `/opt/newsmap/app/newsmap-js`, cloned from GitHub, run as dedicated `newsmap` system user
+- Runs as systemd service `newsmap.service` (`node server.js`, `PORT=8040`), not Docker
+- Apache2 reverse-proxies `newsmap.larcombe.tech` (port 80/443) → `127.0.0.1:8040`; vhost at `/etc/apache2/sites-available/newsmap.larcombe.tech*.conf`
+- TLS via Let's Encrypt (`certbot --apache`), auto-renews
+- **Deploy via GitHub** (never push files directly):
+  ```
+  commit → push to GitHub → ssh tlarcombe@178.105.81.121 →
+  sudo -u newsmap git -C /opt/newsmap/app pull &&
+  sudo -u newsmap npm --prefix /opt/newsmap/app/newsmap-js install &&
+  sudo -u newsmap npm --prefix /opt/newsmap/app/newsmap-js run build &&
+  sudo -u newsmap cp -r /opt/newsmap/app/newsmap-js/dist/* /opt/newsmap/app/newsmap-js/static/ &&
+  sudo systemctl restart newsmap
+  ```
+- Useful commands:
+  ```bash
+  sudo systemctl status newsmap
+  sudo journalctl -u newsmap -f
+  ```
 
-**Always deploy via GitHub** (never push files directly):
-```
-commit → push to GitHub → ssh to baloo → git pull && docker compose up -d --build
-```
+**External URL:** https://newsmap.larcombe.tech → denursrv01 directly (178.105.81.121), no intermediate proxy hop
+- **DNS:** Cloudflare A record, DNS-only (grey cloud), points at 178.105.81.121
 
-Useful commands on baloo:
-```bash
-docker logs newsmap-js
-docker compose down
-docker compose up -d --build
-```
-
-**Internal URL:** http://newsmap.int.larcombe.tech (Caddy on baloo)
-- Caddy config: `~/docker/searxng-docker/Caddyfile` — use `http://` not `https://` (`.int` domains can't get ACME certs)
-- Restart Caddy: `cd ~/docker/searxng-docker && docker compose restart caddy`
-
-**External URL:** https://newsmap.larcombe.tech (SSL valid to 2026-05-30)
-- Route: TonyNET1.1 nginx → Tailscale → baloo:8030 (100.113.72.220)
-- nginx config: `/etc/nginx/sites-available/newsmap.larcombe.tech` on chzursrv02
-
-**DNS:**
-- `newsmap.int.larcombe.tech` → 192.168.1.220 (Technitium)
-- `newsmap.larcombe.tech` → 152.67.72.64 (Cloudflare)
+**Legacy (internal, still running as fallback):** baloo Docker deployment
+- `~/docker/newsmap/newsmap-js/`, port 8030, internal URL http://newsmap.int.larcombe.tech (Caddy)
+- No longer serves the public domain — DNS moved to denursrv01. Left running per 2026-07-02 decision; not actively maintained.
