@@ -300,8 +300,8 @@ class App extends Component {
           </div>
           <p className="App-intro">
             Data from <a href="https://news.google.com">Google News</a>.
-            Inspired by <a href="http://newsmap.jp">newsmap.jp</a>.
-            Fork me on <a href="https://github.com/ijmacd/newsmap-js">GitHub</a>.
+            Inspired by <a href="https://newsmap.ijmacd.com/">newsmap.ijmacd.com</a>.
+            Fork me on <a href="https://github.com/tlarcombe/newsmap-js">GitHub</a>.
           </p>
         </div>
         <div className="App-category-chooser">
